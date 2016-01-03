@@ -19,3 +19,7 @@ renderFixed (Fixed d n b) =
               whole = d // multiplier
               partial = d - (whole * multiplier)
           in toString whole ++ "." ++ toString partial
+
+asFixed : Int -> Float -> String
+asFixed n f = renderFixed <| toFixed n f
+

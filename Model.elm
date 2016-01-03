@@ -2,7 +2,7 @@ module Model where
 
 import Random
 
-import Empire exposing (Empire, City)
+import Empire exposing (Empire)
 import Game exposing (..)
 
 type View = CityList

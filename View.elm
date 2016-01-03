@@ -5,14 +5,17 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
-import City
+import City.Model exposing (City)
+import City.Model as City
+import City.View exposing (cityDetail)
+import Empire exposing (Empire)
 import Fixed exposing (..)
-import Empire exposing (City, Empire)
+import Icons exposing (..)
 import Model exposing (Model(..), View(..))
 import Update exposing (Action(..))
 
-asFixed : Int -> Float -> String
-asFixed n f = renderFixed <| toFixed n f
+-- TODO(periodic): remove this once these functions have been moved into a model module.
+import City.Update as City
 
 view : Signal.Address Action -> Model -> Html
 view address model =
@@ -208,17 +211,3 @@ cityDetail address city =
       ]
     ]
   ] -}
-
-iconMoney = text "(Money)"
-iconScore = text "(Score)"
-iconExploration = text "(Explore)"
-iconFood = text "(Food)"
-iconDistance = text "(Distance)"
-iconPopulation = text "(Pop)"
-iconCapitol = text "(Capitol)"
-iconUnemployed = text "(Unemployed)"
-iconBuildings = text "(Buildings)"
-iconWorkers = text "(Workers)"
-iconAddWorker = text "(Add Worker)"
-iconRemoveWorker = text "(Rem Worker)"
-iconAchievementMet = text "(Achieved!)"

@@ -2,6 +2,7 @@ module Empire where
 
 import List
 import Dict exposing (Dict)
+import City.Model exposing (City, Site)
 
 type alias AchievementId = String
 type alias Achievement =
@@ -13,58 +14,6 @@ type alias Achievement =
   , goal : Int
   }
 type AchievementList = AchievementList (List Achievement)
-
-type alias BuildingId = String
-type alias Building =
-  { id : BuildingId
-  , name : String
-  , description : String
-  , cost : Float
-  , moneyPerSecond : Float
-  , moneyPerSecondWorked : Float
-  , foodPerSecond : Float
-  , foodPerSecondWorked : Float
-  , explorationPerSecond : Float
-  , explorationPerSecondWorked : Float
-  }
-
-type alias CityModifierId = String
-type alias CityModifier =
-  { id : CityModifierId
-  , name : String
-  , moneyMultiplier : Float       -- Money multiplier, zero based.
-  , moneyBonus: Float             -- money / second
-  , explorationMultiplier: Float  -- Exploration multipler, zero based.
-  , explorationBonus: Float       -- exploration / second
-  , foodMultiplier: Float         -- Food multiplier, zero based.
-  , foodBonus: Float              -- food / second
-  }
-
-type alias Site =
-  { distance : Float
-  , modifiers : Dict CityModifierId Float
-  -- Dynamic properties
-  , costMultiplier : Float
-  , moneyMultiplier : Float
-  , explorationMultiplier : Float
-  , foodMultiplier : Float
-  , moneyBonus : Float
-  , explorationBonus : Float
-  , foodBonus : Float
-  }
-
-type alias City =
-  { name : String
-  , buildings : Dict BuildingId Int
-  , workers : Dict BuildingId Int
-  , site : Site
-  -- Dynamic properties
-  , food : Float
-  , population : Int
-  , moneyPerSecond : Float
-  , explorationPerSecond : Float
-  , foodPerSecond : Float
-  }
 
 type alias UpgradeId = String
 type alias Upgrade = {}
@@ -87,7 +36,7 @@ type alias Empire =
   , globalFoodMultiplier : Float
   }
 
-default =
+defaultEmpire =
   { achievementsAcquired = AchievementList []
   , achievementsAvailable = AchievementList []
   , achievementScore = 0

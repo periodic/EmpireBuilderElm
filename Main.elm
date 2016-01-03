@@ -7,22 +7,28 @@ import Signal
 import StartApp.Simple as StartApp
 import Time exposing (Time, timestamp)
 
-import Model exposing (Model)
-import Update
-import View
+import City.Model
+import City.Update
+import City.View
+import WithRandom
+
+type alias Model = City.Model.City
+
 main = 
-  let startTime : Signal Time
+  let startWithSeed = WithRandom.evalWithRandom (City.Update.buildCity City.Update.makeCapitolSite)
+      view = City.View.cityDetail
+      update = City.Update.update
+
+      startTime : Signal Time
       startTime = Signal.constant () |> timestamp |> Signal.map fst
       seedSignal : Signal Random.Seed
       seedSignal = Signal.map (Time.inMilliseconds >> round >> Random.initialSeed) startTime
 
-      initialModelSignal : Signal Model
-      initialModelSignal = Signal.map Model.start seedSignal
 
       actions = Signal.mailbox Nothing
       address = Signal.forwardTo actions.address Just
 
-      fpsSignal = Signal.map (Just << Update.Tick) <| Time.fps 10
+      fpsSignal = Signal.map (Just << City.Update.Tick) <| Time.fps 10
 
       actionsSignal = Signal.mergeMany 
           [ actions.signal
@@ -31,17 +37,21 @@ main =
 
       inputSignal = Signal.map2 (,) seedSignal actionsSignal
 
-      update (seed, appSignal) mModel =
+      updateWithInit (seed, appSignal) mModel =
         let model =
           case mModel of
-            Just model -> model
-            Nothing -> Model.start seed
+            Just model ->
+              model
+            Nothing ->
+              startWithSeed seed
         in case appSignal of
-          Just action -> Just <| Update.update action model
-          Nothing -> Just model
+          Just action ->
+            Just <| update action model
+          Nothing ->
+            Just model
 
       mModelSignal : Signal (Maybe Model)
-      mModelSignal = Signal.foldp update Nothing inputSignal
+      mModelSignal = Signal.foldp updateWithInit Nothing inputSignal
 
       modelSignal : Signal Model
       modelSignal = 
@@ -51,9 +61,9 @@ main =
               case mModel of
                 Just model -> True
                 Nothing -> False)
-            (Just <| Model.start <| Random.initialSeed 0)
+            (Just <| startWithSeed <| Random.initialSeed 0)
         |> Signal.map (\mModel ->
           case mModel of
             Just model -> model
             Nothing -> Debug.crash "Got outgoing empty model")
-  in Signal.map (View.view address) modelSignal
+  in Signal.map (view address) modelSignal

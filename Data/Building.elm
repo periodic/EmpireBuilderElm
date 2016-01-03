@@ -1,8 +1,8 @@
-module Building where
+module Data.Building where
 
 import Dict exposing (Dict)
 
-import Empire exposing (Building, BuildingId)
+import City.Model exposing (Building, BuildingId)
 
 grow : Float -> Float -> Float -> Float
 grow base growthFactor n = base * growthFactor ^ n

@@ -1,141 +1,36 @@
-module City where
+module Data.City where
 
 import Dict exposing (Dict)
 
-import Building
-import Constants
-import Empire exposing (Building, BuildingId, City, CityModifier, CityModifierId, Site)
-
-isCapitol : City -> Bool
-isCapitol city =
-  Dict.member "capitol" city.site.modifiers
-
-numBuildings : City -> Int
-numBuildings city = Dict.foldl (\_ v acc -> acc + v) 0 city.buildings
-
-numWorking : City -> Int
-numWorking city = Dict.foldl (\_ v acc -> acc + v) 0 city.workers
-
-numUnemployed : City -> Int
-numUnemployed city = city.population - numWorking city
-
-nextBirth : City -> Float
-nextBirth city =
-  Constants.baseFoodRequirement * .foodCost Constants.growthFactors ^ toFloat (city.population - 1)
-
-updateWithDefault :
-  number
-  -> (number -> number)
-  -> comparable
-  -> Dict comparable number
-  -> Dict comparable number
-updateWithDefault default f key dict =
-  Dict.update key (\mCount ->
-    case mCount of
-      Nothing -> Just default
-      Just val -> Just (f val))
-    dict
-
-incrementDict : comparable -> Dict comparable number -> Dict comparable number
-incrementDict = updateWithDefault 1 (\x -> x + 1)
-
-addBuilding : BuildingId -> City -> City
-addBuilding buildingId city =
-  { city | buildings = incrementDict buildingId city.buildings }
-
-sumOverModifiers : (CityModifier -> Float) -> Dict CityModifierId Float -> Float
-sumOverModifiers f modifiers =
-  Dict.foldl (\modifierId strength acc ->
-    case Dict.get modifierId modifiersById of
-      Just modifier -> f modifier * strength + acc
-      Nothing       -> acc) 0 modifiers
-
-sumOverBuildings : (Building -> Float) -> Dict BuildingId Int -> Float
-sumOverBuildings f buildings = Dict.foldl (\buildingId count acc ->
-      case Dict.get buildingId Building.byId of
-        Just building -> f building * toFloat count + acc
-        Nothing       -> acc) 0 buildings
-
-updateDynamicProperties : City -> City
-updateDynamicProperties city =
-  let buildingMPS = sumOverBuildings .moneyPerSecond city.buildings
-                  + sumOverBuildings .moneyPerSecondWorked city.workers
-      buildingFPS = sumOverBuildings .foodPerSecond city.buildings
-                  + sumOverBuildings .foodPerSecond city.workers
-      buildingEPS = sumOverBuildings .explorationPerSecond city.buildings
-                  + sumOverBuildings .explorationPerSecond city.workers
-      mps = (city.site.moneyBonus + buildingMPS) * city.site.moneyMultiplier
-      fps = (city.site.foodBonus + buildingFPS) * city.site.foodMultiplier
-      eps = (city.site.explorationBonus + buildingEPS) * city.site.explorationMultiplier
-  in { city | moneyPerSecond = mps, explorationPerSecond = eps, foodPerSecond = fps }
-
-updateCityForDelta : Float -> City -> City
-updateCityForDelta multiplier city =
-  let food' = city.food + city.foodPerSecond * multiplier
-      foodRequired = nextBirth city
-  in if food' >= foodRequired
-        then { city | food = food' - foodRequired, population = city.population + 1 }
-        else { city | food = food' }
-
-makeSite : Float -> Dict CityModifierId Float -> Site
-makeSite distance modifiers =
-  let costMultiplier = distance / Constants.baseDistance + 1
-      moneyMultiplier = 1 + sumOverModifiers .moneyMultiplier modifiers
-      foodMultiplier = 1 + sumOverModifiers .foodMultiplier modifiers
-      explorationMultiplier = 1 + sumOverModifiers .explorationMultiplier modifiers
-      moneyBonus = sumOverModifiers .moneyBonus modifiers
-      foodBonus = sumOverModifiers .foodBonus modifiers
-      explorationBonus = sumOverModifiers .explorationBonus modifiers
-  in { distance = distance
-     , modifiers = modifiers
-     , costMultiplier = costMultiplier
-     , moneyMultiplier = moneyMultiplier
-     , explorationMultiplier = explorationMultiplier
-     , foodMultiplier = foodMultiplier
-     , moneyBonus = moneyBonus
-     , explorationBonus = explorationBonus
-     , foodBonus = foodBonus
-     }
-
-emptyModifier : CityModifier
-emptyModifier =
-  { id = "empty"
-  , name = "Unnamed"
-  , moneyMultiplier = 0
-  , moneyBonus = 0
-  , explorationMultiplier = 0
-  , explorationBonus = 0
-  , foodMultiplier = 0
-  , foodBonus = 0
-  }
+import City.Model exposing (CityModifierId, CityModifier, defaultModifier)
 
 modifiers : List CityModifier
 modifiers =
-  [ { emptyModifier
+  [ { defaultModifier
     | id = "capitol-base"
     , name = "The Capitol"
     , moneyBonus = 1.0
     , explorationBonus = 1.0
     , foodBonus = 1.0
     }
-  , { emptyModifier
+  , { defaultModifier
     | id = "capitol-scaling"
     , name = "Empire Size Bonus"
     , moneyMultiplier = 0.01
     , explorationMultiplier = 0.01
     , foodMultiplier = 0.01
     }
-  , { emptyModifier
+  , { defaultModifier
     | id = "money"
     , name = "Money Bonus"
     , moneyMultiplier = 1.0
     }
-  , { emptyModifier
+  , { defaultModifier
     | id = "exploration"
     , name = "Exploration Bonus"
     , explorationMultiplier = 1.0
     }
-  , { emptyModifier
+  , { defaultModifier
     | id = "food"
     , name = "Food Bonus"
     , foodMultiplier = 1.0
@@ -255,29 +150,3 @@ names =
 modifiersById : Dict CityModifierId CityModifier
 modifiersById = Dict.fromList
      <| List.map (\modifier -> (modifier.id, modifier)) modifiers
-
-defaultSite : Site
-defaultSite =
-  { distance = 0
-  , modifiers = Dict.empty
-  , costMultiplier = 1.0
-  , moneyMultiplier = 1.0
-  , explorationMultiplier = 1.0
-  , foodMultiplier = 1.0
-  , moneyBonus = 0.0
-  , explorationBonus = 0.0
-  , foodBonus = 0.0
-  }
-
-default : City
-default =
-  { name = "Unnamed"
-  , buildings = Dict.empty
-  , workers = Dict.empty
-  , site = defaultSite
-  , food = 0
-  , population = 1
-  , moneyPerSecond = 0
-  , explorationPerSecond = 0
-  , foodPerSecond = 0
-  }
