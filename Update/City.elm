@@ -1,4 +1,4 @@
-module City.Update where
+module Update.City where
 
 import Debug
 import Dict exposing (Dict)
@@ -8,7 +8,7 @@ import Time exposing (Time)
 import Data.Building as Building
 import Data.Constants as Constants
 import Data.City as City
-import City.Model exposing (..)
+import Model.City exposing (..)
 import WithRandom exposing (WithRandom)
 
 type Action

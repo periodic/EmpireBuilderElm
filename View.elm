@@ -5,9 +5,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
-import City.Model exposing (City)
-import City.Model as City
-import City.View exposing (cityDetail)
+import Model.City exposing (City)
+import Model.City as City
+import View.City exposing (cityDetail)
 import Empire exposing (Empire)
 import Fixed exposing (..)
 import Icons exposing (..)
@@ -15,7 +15,7 @@ import Model exposing (Model(..), View(..))
 import Update exposing (Action(..))
 
 -- TODO(periodic): remove this once these functions have been moved into a model module.
-import City.Update as City
+import Update.City as City
 
 view : Signal.Address Action -> Model -> Html
 view address model =

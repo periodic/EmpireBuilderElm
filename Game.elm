@@ -7,12 +7,12 @@ import Random
 import Time exposing (Time)
 
 import Achievement
-import City.Update
+import Update.City
 import Data.Constants as Constants
 import Data.Building as Building
 import Data.City as City
--- TODO(periodic): Change this to all functions from City.Update.
-import City.Model exposing (City, CityModifier, CityModifierId, Site, defaultCity)
+-- TODO(periodic): Change this to all functions from Update.City.
+import Model.City exposing (City, CityModifier, CityModifierId, Site, defaultCity)
 import Empire exposing (Empire, defaultEmpire)
 
 type alias GameState =
@@ -84,7 +84,7 @@ updateEmpireForDelta : Float -> Empire -> Empire
 updateEmpireForDelta multiplier empire =
   let money' = empire.money + empire.moneyPerSecond * multiplier
       exploration' = empire.exploration + empire.explorationPerSecond * multiplier
-      cities' = List.map (City.Update.updateCityForDelta multiplier) empire.cities
+      cities' = List.map (Update.City.updateCityForDelta multiplier) empire.cities
   in { empire | money = money', exploration = exploration', cities = cities' }
 
 onTick : Time -> Game ()

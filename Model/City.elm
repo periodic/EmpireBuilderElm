@@ -1,4 +1,4 @@
-module City.Model where
+module Model.City where
 
 import Dict exposing (Dict)
 

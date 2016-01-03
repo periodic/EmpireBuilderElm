@@ -2,7 +2,7 @@ module Data.City where
 
 import Dict exposing (Dict)
 
-import City.Model exposing (CityModifierId, CityModifier, defaultModifier)
+import Model.City exposing (CityModifierId, CityModifier, defaultModifier)
 
 modifiers : List CityModifier
 modifiers =

@@ -1,11 +1,11 @@
-module City.View where
+module View.City where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
-import City.Model exposing (..)
-import City.Update exposing (Action(..))
+import Model.City exposing (..)
+import Update.City exposing (Action(..))
 import Fixed exposing (..)
 import Icons exposing (..)
 
