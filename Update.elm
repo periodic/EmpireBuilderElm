@@ -13,7 +13,6 @@ type Action
   | ShowCityDetails Int
   | Tick Time
 
-
 update : Action -> Model -> Model
 update action (Model view gameState) =
   case action of

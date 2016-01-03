@@ -13,6 +13,8 @@ import WithRandom exposing (WithRandom)
 
 type Action
   = Build BuildingId
+  | AssignWorker BuildingId
+  | UnassignWorker BuildingId
   | Tick Time
 
 
@@ -20,7 +22,13 @@ update : Action -> City -> City
 update action city =
   case action of
     Build buildingId ->
-      Debug.crash "Unimplemented"
+      always city <| Debug.log "Build unimplemented" buildingId
+
+    AssignWorker buildingId ->
+      always city <| Debug.log "Assign worker unimplemented" buildingId
+
+    UnassignWorker buildingId ->
+      always city <| Debug.log "Unassign worker unimplemented" buildingId
 
     Tick delta ->
       updateCityForDelta (Time.inSeconds delta) city

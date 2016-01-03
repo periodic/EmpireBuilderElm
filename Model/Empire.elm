@@ -1,8 +1,9 @@
-module Empire where
+module Model.Empire where
 
 import List
 import Dict exposing (Dict)
-import City.Model exposing (City, Site)
+import Model.City exposing (City, Site)
+
 
 type alias AchievementId = String
 type alias Achievement =
@@ -15,8 +16,10 @@ type alias Achievement =
   }
 type AchievementList = AchievementList (List Achievement)
 
+
 type alias UpgradeId = String
 type alias Upgrade = {}
+
 
 type alias Empire =
   { achievementsAvailable : AchievementList

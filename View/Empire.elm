@@ -1,25 +1,20 @@
-module View where
+module View.Empire where
 
 import Debug
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
-import Model.City exposing (City)
-import Model.City as City
-import View.City exposing (cityDetail)
-import Empire exposing (Empire)
 import Fixed exposing (..)
 import Icons exposing (..)
-import Model exposing (Model(..), View(..))
-import Update exposing (Action(..))
+import Model.City as City exposing (City)
+import Model.Empire as Empire exposing (Empire)
+import Update.Empire exposing (Action(..), Model(..), View(..))
+import View.City exposing (cityDetail)
 
--- TODO(periodic): remove this once these functions have been moved into a model module.
-import Update.City as City
-
-view : Signal.Address Action -> Model -> Html
-view address model =
-  let (Model _ {empire}) = model
+empireDetail : Signal.Address Action -> Model -> Html
+empireDetail address model =
+  let (Model _ empire) = model
   in div [ id "game", class "container" ]
     [ statusBar address empire
     , mainView address model
@@ -55,13 +50,13 @@ statusBar address empire =
     ]
 
 mainView : Signal.Address Action -> Model -> Html
-mainView address (Model view {empire}) =
+mainView address (Model view empire) =
   div [ id "main" ]
     [ case view of
         CityList        -> cityListView address empire.cities
         CityDetails idx ->
           case List.head <| List.drop idx empire.cities of
-            Just city -> cityDetailsView address empire.cities city
+            Just city -> cityDetailsView address empire.cities idx city
             Nothing -> Debug.log "Got invalid city index in view ."
                                  <| cityListView address empire.cities
         Upgrades        -> upgradesView address
@@ -78,13 +73,13 @@ cityListView address cities  =
       ]
     ]
 
-cityDetailsView : Signal.Address Action -> List City -> City -> Html
-cityDetailsView address cities city =
+cityDetailsView : Signal.Address Action -> List City -> Int -> City -> Html
+cityDetailsView address cities cityIndex city =
   div []
     [ h2 [] [ text "Cities" ]
     , div [ class "row" ]
       [ cityList address cities
-      , cityDetail address city
+      , cityDetail (Signal.forwardTo address (CityAction cityIndex)) city
       ]
     ]
 
@@ -126,88 +121,3 @@ cityListLine address index city =
     , td [ class "exploration-delta" ] [ text << asFixed 2 <| city.explorationPerSecond ]
     , td [ class "unemployed" ] [ text << toString <| City.numUnemployed city ]
     ]
-
-cityDetail : Signal.Address Action -> City -> Html
-cityDetail address city =
-  div [ class "city-detail" ]
-    [ h3 [ class "name" ] [ text city.name  ]
-    , div [ class "metrics" ]
-      [ p [ class "distance-penalty" ] 
-        [ iconDistance
-        , text <| asFixed 0 city.site.distance
-        ]
-      , p [ class "population" ]
-        [ iconPopulation
-        , text <| toString city.population
-        ]
-      , p [ class "food" ]
-        [ iconFood
-        , text << asFixed 0 <| city.food
-        , text "/"
-        , text << asFixed 0 <| City.nextBirth city
-        , text "(+"
-        , text << asFixed 1 <| city.foodPerSecond
-        , text ")"
-        ]
-      , p [ class "unemployed" ]
-        [ iconUnemployed
-        , text << toString <| city.population - City.numWorking city
-        ]
-      ]
-    ]
-
-{-
-    , div [ class "modifiers" ] ng-if="hasModifiers()">
-      , table [ class "table modifier-list" ]>
-        , thead>
-          , tr [ class "modifier-list-header" ]>
-            , th simple-tooltip="The name of the modifier.">Modifier]
-            , th simple-tooltip="A measure of how large a bonus this modifier provides.">Strength]
-            , th>Description]
-          ]
-        ]
-        , tbody>
-          , tr ng-repeat="modifier in getModifiers()">
-            , td>[  getModifierName(modifier)  ]]
-            , td>[  getModifierStrength(modifier) | number:0  ]]
-            , td>[  getModifierDescription(modifier)  ]]
-          ]
-        ]
-      ]
-    ] -}
-
-{-
-    , table [ class "building-list table" ]>
-      , thead>
-        , tr [ class "building-list-header" ]>
-          , th [ class "name" ]>Building]
-          , th [ class "count" ] simple-tooltip="The number of buildings built."><iconBuildings]
-          , th [ class "workers" ] simple-tooltip="The number of citizens working at this building."><iconWorkers]
-          , th [ class "description" ]>Description]
-          , th [ class "actions" ]>]
-        ]
-      ]
-      , tbody>
-        , tr ng-repeat="building in getBuildings()">
-          , td [ class "name" ]>[  building.name  ]]
-          , td [ class "count" ]>[  getBuildingCount(building.id) | number:0  ]]
-          , td [ class "workers" ]>
-            , a ng-click="city.addWorker(building.id)">
-              , icon-add-worker></icon-add-worker>
-            ]
-            [  getNumWorkers(building.id) | number:0  ]
-            , a ng-click="city.removeWorker(building.id)">
-              , icon-remove-worker></icon-remove-worker>
-            ]
-          ]
-          , td [ class "description" ]>[  building.description  ]]
-          , td [ class "actions" ]>
-            , a [ class "btn btn-primary btn-buy" ] ng-click="purchase(building.id)"
-              ng-[ class "canPurchase(building.id) || 'disabled'" ]>
-              Buy [  getBuildingCost(building.id) | roundUp | number:0  ], iconMoney
-            ]
-          ]
-        ]
-      ]
-    ]
-  ] -}

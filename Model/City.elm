@@ -115,3 +115,6 @@ nextBirth : City -> Float
 nextBirth city =
   Constants.baseFoodRequirement * .foodCost Constants.growthFactors ^ toFloat (city.population - 1)
 
+buildingCost : Building -> Int -> Int
+buildingCost building count =
+  ceiling <| building.cost * .buildingCost Constants.growthFactors ^ (toFloat count)

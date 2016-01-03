@@ -7,17 +7,17 @@ import Signal
 import StartApp.Simple as StartApp
 import Time exposing (Time, timestamp)
 
-import Model.City
-import Update.City
-import View.City
+import Model.Empire
+import Update.Empire
+import View.Empire
 import WithRandom
 
-type alias Model = Model.City.City
+type alias Model = Update.Empire.Model
 
 main = 
-  let startWithSeed = WithRandom.evalWithRandom (Update.City.buildCity Update.City.makeCapitolSite)
-      view = View.City.cityDetail
-      update = Update.City.update
+  let initializeWithSeed = WithRandom.evalWithRandom Update.Empire.initializeWithSeed
+      view = View.Empire.empireDetail
+      update = Update.Empire.update
 
       startTime : Signal Time
       startTime = Signal.constant () |> timestamp |> Signal.map fst
@@ -28,7 +28,7 @@ main =
       actions = Signal.mailbox Nothing
       address = Signal.forwardTo actions.address Just
 
-      fpsSignal = Signal.map (Just << Update.City.Tick) <| Time.fps 10
+      fpsSignal = Signal.map (Just << Update.Empire.Tick) <| Time.fps 10
 
       actionsSignal = Signal.mergeMany 
           [ actions.signal
@@ -43,7 +43,7 @@ main =
             Just model ->
               model
             Nothing ->
-              startWithSeed seed
+              initializeWithSeed seed
         in case appSignal of
           Just action ->
             Just <| update action model
@@ -61,7 +61,7 @@ main =
               case mModel of
                 Just model -> True
                 Nothing -> False)
-            (Just <| startWithSeed <| Random.initialSeed 0)
+            (Just <| initializeWithSeed <| Random.initialSeed 0)
         |> Signal.map (\mModel ->
           case mModel of
             Just model -> model
