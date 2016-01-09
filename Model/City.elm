@@ -99,17 +99,25 @@ isCapitol : City -> Bool
 isCapitol city =
   Dict.member "capitol" city.site.modifiers
 
-numBuildings : City -> Int
-numBuildings city =
+numBuildings : BuildingId -> City -> Int
+numBuildings buildingId city =
+  Maybe.withDefault 0 <| Dict.get buildingId city.buildings
+
+totalBuildings : City -> Int
+totalBuildings city =
   Dict.foldl (\_ v acc -> acc + v) 0 city.buildings
 
-numWorking : City -> Int
-numWorking city =
+numWorking : BuildingId -> City -> Int
+numWorking buildingId city =
+  Maybe.withDefault 0 <| Dict.get buildingId city.workers
+
+totalWorking : City -> Int
+totalWorking city =
   Dict.foldl (\_ v acc -> acc + v) 0 city.workers
 
 numUnemployed : City -> Int
 numUnemployed city =
-  city.population - numWorking city
+  city.population - totalWorking city
 
 nextBirth : City -> Float
 nextBirth city =
@@ -118,3 +126,8 @@ nextBirth city =
 buildingCost : Building -> Int -> Int
 buildingCost building count =
   ceiling <| building.cost * .buildingCost Constants.growthFactors ^ (toFloat count)
+
+buildingCostNext : City -> Building -> Int
+buildingCostNext city building =
+  buildingCost building <| Maybe.withDefault 0 <| Dict.get building.id city.buildings
+

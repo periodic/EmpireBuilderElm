@@ -22,13 +22,17 @@ update : Action -> City -> City
 update action city =
   case action of
     Build buildingId ->
-      always city <| Debug.log "Build unimplemented" buildingId
+      updateDynamicProperties <| addBuilding buildingId city
 
     AssignWorker buildingId ->
-      always city <| Debug.log "Assign worker unimplemented" buildingId
+      if numUnemployed city > 0
+         then updateDynamicProperties <| addWorker buildingId city
+         else always city <| Debug.log "Insufficient workers." buildingId
 
     UnassignWorker buildingId ->
-      always city <| Debug.log "Unassign worker unimplemented" buildingId
+      if numWorking buildingId city > 0
+         then updateDynamicProperties <| removeWorker buildingId city
+         else always city <| Debug.log "No workers to unassign." buildingId
 
     Tick delta ->
       updateCityForDelta (Time.inSeconds delta) city
@@ -41,19 +45,31 @@ updateWithDefault :
   -> Dict comparable number
   -> Dict comparable number
 updateWithDefault default f key dict =
-  Dict.update key (\mCount ->
-    case mCount of
-      Nothing -> Just default
-      Just val -> Just (f val))
-    dict
+  Dict.insert key (f <| Maybe.withDefault (default) <| Dict.get key dict) dict
 
 
 incrementDict : comparable -> Dict comparable number -> Dict comparable number
-incrementDict = updateWithDefault 1 (\x -> x + 1)
+incrementDict = updateWithDefault 0 (\x -> x + 1)
+
+
+decrementDict : comparable -> Dict comparable number -> Dict comparable number
+decrementDict = updateWithDefault 0 (\x -> x - 1)
+
 
 addBuilding : BuildingId -> City -> City
 addBuilding buildingId city =
   { city | buildings = incrementDict buildingId city.buildings }
+
+
+addWorker : BuildingId -> City -> City
+addWorker buildingId city =
+  { city | workers = incrementDict buildingId city.workers }
+
+
+removeWorker : BuildingId -> City -> City
+removeWorker buildingId city =
+  { city | workers = decrementDict buildingId city.workers }
+
 
 sumOverBuildings : (Building -> Float) -> Dict BuildingId Int -> Float
 sumOverBuildings f buildings = Dict.foldl (\buildingId count acc ->
@@ -66,13 +82,13 @@ updateDynamicProperties city =
   let buildingMPS = sumOverBuildings .moneyPerSecond city.buildings
                   + sumOverBuildings .moneyPerSecondWorked city.workers
       buildingFPS = sumOverBuildings .foodPerSecond city.buildings
-                  + sumOverBuildings .foodPerSecond city.workers
+                  + sumOverBuildings .foodPerSecondWorked city.workers
       buildingEPS = sumOverBuildings .explorationPerSecond city.buildings
-                  + sumOverBuildings .explorationPerSecond city.workers
+                  + sumOverBuildings .explorationPerSecondWorked city.workers
       mps = (city.site.moneyBonus + buildingMPS) * city.site.moneyMultiplier
       fps = (city.site.foodBonus + buildingFPS) * city.site.foodMultiplier
       eps = (city.site.explorationBonus + buildingEPS) * city.site.explorationMultiplier
-  in { city | moneyPerSecond = mps, explorationPerSecond = eps, foodPerSecond = fps }
+  in { city | moneyPerSecond = mps, foodPerSecond = fps, explorationPerSecond = eps }
 
 
 updateCityForDelta : Float -> City -> City

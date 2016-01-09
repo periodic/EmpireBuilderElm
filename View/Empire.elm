@@ -116,7 +116,7 @@ cityListLine address index city =
     [ td [ class "name" ]
       ( text city.name :: if City.isCapitol city then [ iconCapitol ] else [])
     , td [ class "population" ] [ text << toString <| city.population ]
-    , td [ class "buildings" ] [ text << toString <| City.numBuildings city ]
+    , td [ class "buildings" ] [ text << toString <| City.totalBuildings city ]
     , td [ class "money-delta" ] [ text << asFixed 2 <| city.moneyPerSecond ]
     , td [ class "exploration-delta" ] [ text << asFixed 2 <| city.explorationPerSecond ]
     , td [ class "unemployed" ] [ text << toString <| City.numUnemployed city ]

@@ -37,7 +37,7 @@ cityDetail address city =
         ]
       , p [ class "unemployed" ]
         [ iconUnemployed
-        , text << toString <| city.population - numWorking city
+        , text << toString <| numUnemployed city
         ]
       , buildingList address city.buildings city.workers
       ]
@@ -69,7 +69,7 @@ building address buildings workers (buildingId, building) =
 workerDetail : Signal.Address Action -> BuildingId -> Int -> Html
 workerDetail address buildingId count =
   div [ class "workers" ]
-    [ button [ onClick address (AssignWorker buildingId) ] [ iconAddWorker ]
+    [ button [ onClick address (UnassignWorker buildingId) ] [ iconRemoveWorker ]
     , text (toString count)
-    , button [ onClick address (UnassignWorker buildingId) ] [ iconRemoveWorker ]
+    , button [ onClick address (AssignWorker buildingId) ] [ iconAddWorker ]
     ]
